@@ -313,32 +313,52 @@ var PEEKERS = [
   { src: 'assets/chu-re-lap-lo.webp', alt: 'Bật Hưng lấp ló' },
   { src: 'assets/co-dau-lap-lo.webp', alt: 'Diệu Huyền lấp ló' }
 ];
-/* vị trí an toàn theo từng màn (góc/cạnh, không che nội dung chính) */
+/* màn envelope/finale: nội dung căn giữa nên 4 góc viewport luôn trống */
 var PEEK_SPOTS = {
   envelope: [ {top:'76px',left:'10px'}, {top:'76px',right:'10px'}, {bottom:'18px',left:'10px'}, {bottom:'18px',right:'10px'} ],
-  letter:   [ {bottom:'14px',left:'8px'}, {bottom:'14px',right:'8px'} ],
-  stage:    [ {bottom:'12px',left:'8px'}, {bottom:'12px',right:'8px'} ],
-  finale:   [ {top:'76px',left:'10px'}, {bottom:'18px',right:'10px'}, {bottom:'18px',left:'10px'} ]
+  finale:   [ {top:'76px',left:'10px'}, {top:'76px',right:'10px'}, {bottom:'18px',left:'10px'}, {bottom:'18px',right:'10px'} ]
 };
+function clearPeekers() {
+  var box = $('peekers');
+  if (box) box.innerHTML = '';
+  var olds = document.querySelectorAll('.peeker-card');
+  for (var i = 0; i < olds.length; i++) olds[i].parentNode.removeChild(olds[i]);
+}
 function spawnPeekers(screen) {
+  clearPeekers();
+  var chars = PEEKERS.slice().sort(function () { return Math.random() - 0.5; });
+  var n = 1 + (Math.random() < 0.6 ? 1 : 0); // 1-2 đứa
+  /* màn thư / chặng: lấp ló sau 2 góc trên của card — không bao giờ che chữ */
+  if (screen === 'stage' || screen === 'letter') {
+    var host = document.querySelector(screen === 'stage' ? '#scr-stage .stage-card' : '#scr-letter .paper');
+    if (!host) return;
+    var sides = ['pl', 'pr'].sort(function () { return Math.random() - 0.5; });
+    for (var i = 0; i < Math.min(n, 2); i++) {
+      var img = document.createElement('img');
+      img.className = 'peeker-card ' + sides[i];
+      img.src = chars[i % chars.length].src;
+      img.alt = chars[i % chars.length].alt;
+      img.style.animationDelay = (i * 0.35) + 's, ' + (0.6 + i * 0.35) + 's';
+      host.appendChild(img);
+    }
+    return;
+  }
   var box = $('peekers');
   if (!box) return;
-  box.innerHTML = '';
   var spots = (PEEK_SPOTS[screen] || []).slice().sort(function () { return Math.random() - 0.5; });
-  var chars = PEEKERS.slice().sort(function () { return Math.random() - 0.5; });
-  var n = Math.min(spots.length, 1 + (Math.random() < 0.6 ? 1 : 0)); // 1-2 đứa
-  for (var i = 0; i < n; i++) {
-    var img = document.createElement('img');
-    img.className = 'peeker';
-    img.src = chars[i % chars.length].src;
-    img.alt = chars[i % chars.length].alt;
-    var sp = spots[i];
-    if (sp.top) img.style.top = sp.top;
-    if (sp.bottom) img.style.bottom = sp.bottom;
-    if (sp.left) img.style.left = sp.left;
-    if (sp.right) img.style.right = sp.right;
-    img.style.animationDelay = (i * 0.4) + 's, ' + (0.6 + i * 0.4) + 's';
-    box.appendChild(img);
+  n = Math.min(spots.length, n);
+  for (var j = 0; j < n; j++) {
+    var im = document.createElement('img');
+    im.className = 'peeker';
+    im.src = chars[j % chars.length].src;
+    im.alt = chars[j % chars.length].alt;
+    var sp = spots[j];
+    if (sp.top) im.style.top = sp.top;
+    if (sp.bottom) im.style.bottom = sp.bottom;
+    if (sp.left) im.style.left = sp.left;
+    if (sp.right) im.style.right = sp.right;
+    im.style.animationDelay = (j * 0.35) + 's, ' + (0.6 + j * 0.35) + 's';
+    box.appendChild(im);
   }
 }
 
@@ -612,9 +632,16 @@ function stopCatch() {
   if (catchRAF) { cancelAnimationFrame(catchRAF); catchRAF = null; }
 }
 
-/* ---- 2024: ghép tim 4 mảnh ---- */
+/* ---- 2024: ghép tim 4 mảnh ----
+   Mỗi mảnh là TRỌN trái tim 200x200 (khớp khít lưới slot), chỉ hiện 1/4 nhờ
+   clip-path. Khi đặt, mảnh bay về đúng gốc lưới, scale 1 — 4 mảnh tile khít
+   tuyệt đối, không khe hở (không còn công thức scale quanh tâm dễ lệch). */
 function buildPuzzle(body) {
   var clips = ['inset(0 50% 50% 0)', 'inset(0 0 50% 50%)', 'inset(50% 50% 0 0)', 'inset(50% 0 0 50%)'];
+  var GRID_L = 24, GRID_T = 0;   // gốc lưới slot 200x200 trong board
+  var PS = 0.28;                 // mảnh thu nhỏ trong khay: 200*0.28 = 56px
+  var trayX = [8, 68, 128, 188], trayY = 248;
+
   var board = document.createElement('div'); board.className = 'puzzle-board';
   var slots = document.createElement('div'); slots.className = 'puzzle-slots';
   var slotEls = [];
@@ -624,28 +651,27 @@ function buildPuzzle(body) {
     slots.appendChild(sl); slotEls.push(sl);
   }
   board.appendChild(slots);
+  // tim mẫu mờ làm nền — thấy ngay đích đến
+  var ghost = document.createElement('div'); ghost.className = 'puzzle-ghost';
+  ghost.innerHTML = heartSVG('#f25c84');
+  board.appendChild(ghost);
+
   var order = [0, 1, 2, 3].sort(function () { return Math.random() - 0.5; });
-  var placed = 0, done = false;
-  var trayY = [232, 232, 232, 232], trayX = [8, 64, 120, 176];
   var pos = [0, 1, 2, 3].sort(function () { return Math.random() - 0.5; });
+  var placed = 0, done = false;
   order.forEach(function (qi, k) {
     var p = document.createElement('div');
     p.className = 'puzzle-piece';
     p.dataset.q = qi;
-    p.style.left = trayX[pos[k]] + 'px';
-    p.style.top = trayY[pos[k]] + 'px';
+    var tx = trayX[pos[k]];
+    p.style.left = tx + 'px';
+    p.style.top = trayY + 'px';
+    p.style.transform = 'scale(' + PS + ')';
     p.innerHTML = heartSVG('#f25c84').replace('<svg', '<svg style="clip-path:' + clips[qi] + '"');
     p.addEventListener('click', function () {
       if (done || p.classList.contains('placed')) return;
-      var slot = slotEls[qi];
-      var pr = p.getBoundingClientRect(), sr = slot.getBoundingClientRect();
-      /* mảnh 56px, phần tim nhìn thấy là 1/4 góc 28x28 -> scale để lấp đầy slot 100px,
-         tâm mảnh đặt lệch nửa slot để góc tim khít vào đúng ô của lưới 2x2 */
-      var OFFX = [50, -50, 50, -50], OFFY = [50, 50, -50, -50];
-      var dx = (sr.left + sr.width / 2 + OFFX[qi]) - (pr.left + pr.width / 2);
-      var dy = (sr.top + sr.height / 2 + OFFY[qi]) - (pr.top + pr.height / 2);
-      var sc = sr.width / 28;
-      p.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sc + ')';
+      // về đúng gốc lưới, scale 1 — 4 mảnh ráp khít thành tim liền mạch
+      p.style.transform = 'translate(' + (GRID_L - tx) + 'px,' + (GRID_T - trayY) + 'px) scale(1)';
       p.classList.add('placed');
       placed++;
       var r = p.getBoundingClientRect();
