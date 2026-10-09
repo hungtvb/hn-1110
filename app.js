@@ -304,9 +304,43 @@ function setRainbow(i) {
 
 /* ================= chạm bất kỳ đâu → tim bung ================= */
 document.addEventListener('pointerdown', function (e) {
-  if (e.target.closest('button, canvas, .envelope, .tap-heart, .puzzle-piece, .finale-sprite, #music-toggle')) return;
+  if (e.target.closest('button, canvas, .envelope, .tap-heart, .puzzle-piece, #music-toggle')) return;
   spawnHeartBurst(e.clientX, e.clientY, 4);
 });
+
+/* ================= 2 nhân vật lấp ló rình xem ================= */
+var PEEKERS = [
+  { src: 'assets/chu-re-lap-lo.webp', alt: 'Bật Hưng lấp ló' },
+  { src: 'assets/co-dau-lap-lo.webp', alt: 'Diệu Huyền lấp ló' }
+];
+/* vị trí an toàn theo từng màn (góc/cạnh, không che nội dung chính) */
+var PEEK_SPOTS = {
+  envelope: [ {top:'76px',left:'10px'}, {top:'76px',right:'10px'}, {bottom:'18px',left:'10px'}, {bottom:'18px',right:'10px'} ],
+  letter:   [ {bottom:'14px',left:'8px'}, {bottom:'14px',right:'8px'} ],
+  stage:    [ {bottom:'12px',left:'8px'}, {bottom:'12px',right:'8px'} ],
+  finale:   [ {top:'76px',left:'10px'}, {bottom:'18px',right:'10px'}, {bottom:'18px',left:'10px'} ]
+};
+function spawnPeekers(screen) {
+  var box = $('peekers');
+  if (!box) return;
+  box.innerHTML = '';
+  var spots = (PEEK_SPOTS[screen] || []).slice().sort(function () { return Math.random() - 0.5; });
+  var chars = PEEKERS.slice().sort(function () { return Math.random() - 0.5; });
+  var n = Math.min(spots.length, 1 + (Math.random() < 0.6 ? 1 : 0)); // 1-2 đứa
+  for (var i = 0; i < n; i++) {
+    var img = document.createElement('img');
+    img.className = 'peeker';
+    img.src = chars[i % chars.length].src;
+    img.alt = chars[i % chars.length].alt;
+    var sp = spots[i];
+    if (sp.top) img.style.top = sp.top;
+    if (sp.bottom) img.style.bottom = sp.bottom;
+    if (sp.left) img.style.left = sp.left;
+    if (sp.right) img.style.right = sp.right;
+    img.style.animationDelay = (i * 0.4) + 's, ' + (0.6 + i * 0.4) + 's';
+    box.appendChild(img);
+  }
+}
 
 /* ================= Screens ================= */
 var screens = {
@@ -320,6 +354,7 @@ function show(name) {
   void screens[name].offsetWidth;
   screens[name].classList.add('active');
   window.scrollTo(0, 0);
+  spawnPeekers(name); // 2 đứa lấp ló đổi vị trí random mỗi màn
 }
 
 /* ================= Phong bì ================= */
@@ -604,9 +639,12 @@ function buildPuzzle(body) {
       if (done || p.classList.contains('placed')) return;
       var slot = slotEls[qi];
       var pr = p.getBoundingClientRect(), sr = slot.getBoundingClientRect();
-      var dx = (sr.left + sr.width / 2) - (pr.left + pr.width / 2);
-      var dy = (sr.top + sr.height / 2) - (pr.top + pr.height / 2);
-      var sc = sr.width / pr.width;
+      /* mảnh 56px, phần tim nhìn thấy là 1/4 góc 28x28 -> scale để lấp đầy slot 100px,
+         tâm mảnh đặt lệch nửa slot để góc tim khít vào đúng ô của lưới 2x2 */
+      var OFFX = [50, -50, 50, -50], OFFY = [50, 50, -50, -50];
+      var dx = (sr.left + sr.width / 2 + OFFX[qi]) - (pr.left + pr.width / 2);
+      var dy = (sr.top + sr.height / 2 + OFFY[qi]) - (pr.top + pr.height / 2);
+      var sc = sr.width / 28;
       p.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sc + ')';
       p.classList.add('placed');
       placed++;
@@ -657,17 +695,6 @@ function startFinale() {
   }, 450);
 }
 
-/* chạm vào cặp đôi ở finale → phóng to + tim bung */
-function kissSprites() {
-  var row = $('finale-row');
-  if (row.classList.contains('kiss')) return;
-  row.classList.add('kiss');
-  var r = $('photo-vochong').getBoundingClientRect();
-  spawnHeartBurst(r.left + r.width / 2, r.top + 30, 16);
-  setTimeout(function () { row.classList.remove('kiss'); }, 1400);
-}
-$('sprite-fin-couple').addEventListener('click', kissSprites);
-
 $('btn-replay').addEventListener('click', function () {
   parts = [];
   envelopeOpened = false;
@@ -681,5 +708,6 @@ $('btn-replay').addEventListener('click', function () {
 
 /* ================= Boot ================= */
 setFxMode('ambient');
+spawnPeekers('envelope'); // 2 đứa lấp ló ngay từ màn phong bì
 
 })();
