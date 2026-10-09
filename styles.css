@@ -212,6 +212,7 @@ body::before {
   padding: 34px 26px 30px;
   max-width: 420px; width: 100%;
   text-align: center;
+  position: relative;
 }
 .paper-title { font-size: 44px; color: var(--wine); margin-bottom: 12px; }
 .paper-text { font-size: 15.5px; line-height: 1.75; color: var(--ink); margin-bottom: 12px; font-weight: 300; }
@@ -281,6 +282,7 @@ body::before {
   padding: 26px 20px;
   min-height: 300px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  position: relative;
 }
 .stage-msg {
   margin: 16px 4px 4px; text-align: center;
@@ -319,6 +321,12 @@ body::before {
 #catch-canvas { touch-action: none; border-radius: 12px; background: rgba(255,255,255,.5); border: 1px dashed rgba(242,92,132,.35); }
 
 .puzzle-board { position: relative; width: 248px; height: 330px; }
+/* tim mẫu mờ làm nền — người chơi thấy ngay đích đến */
+.puzzle-ghost {
+  position: absolute; top: 0; left: 24px; width: 200px; height: 200px;
+  opacity: .12; pointer-events: none;
+}
+.puzzle-ghost svg { width: 100%; height: 100%; display: block; }
 .puzzle-slots { position: absolute; top: 0; left: 24px; width: 200px; height: 200px; }
 .puzzle-slot {
   position: absolute; width: 100px; height: 100px;
@@ -330,11 +338,12 @@ body::before {
 .puzzle-slot.s2 { left: 0; top: 100px; border-radius: 0 0 0 18px; }
 .puzzle-slot.s3 { left: 100px; top: 100px; border-radius: 0 0 18px 0; }
 .puzzle-piece {
-  position: absolute; width: 56px; height: 56px; cursor: pointer;
+  position: absolute; width: 200px; height: 200px; cursor: pointer;
+  transform-origin: top left;
   transition: transform .55s cubic-bezier(.5,0,.3,1.2);
   filter: drop-shadow(0 4px 8px rgba(242,92,132,.4));
 }
-.puzzle-piece svg { width: 100%; height: 100%; }
+.puzzle-piece svg { width: 100%; height: 100%; display: block; }
 .puzzle-done { margin-top: 10px; font-size: 15px; color: var(--wine); font-weight: 500; }
 
 /* ============ FINALE ============ */
@@ -449,6 +458,18 @@ body.rb5::after { background:
   0%, 100% { transform: scale(1) rotate(4deg) translateY(0); }
   50% { transform: scale(1) rotate(-4deg) translateY(-6px); }
 }
+/* lấp ló sau 2 góc trên của card (màn thư / chặng) — không bao giờ che chữ */
+.peeker-card {
+  position: absolute; top: -24px; width: 68px; height: 68px;
+  border-radius: 50%; object-fit: cover;
+  border: 2.5px solid #fff;
+  box-shadow: 0 6px 16px rgba(164,19,60,.28);
+  z-index: 5; pointer-events: none; user-select: none; -webkit-user-drag: none;
+  opacity: 0;
+  animation: peekIn .6s cubic-bezier(.4,0,.3,1.3) forwards, peekBob 3.2s ease-in-out .6s infinite;
+}
+.peeker-card.pl { left: -16px; }
+.peeker-card.pr { right: -16px; }
 
 @media (max-width: 360px) {
   .envelope { width: 270px; height: 180px; }
