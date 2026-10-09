@@ -98,6 +98,9 @@ body::before {
 
 .script { font-family: 'Great Vibes', cursive; font-weight: 400; }
 
+/* giữ cụm từ dính nhau khi xuống dòng (tên riêng, "mãi mãi") */
+.nowrap { white-space: nowrap; }
+
 .screen {
   display: none;
   min-height: 100vh; min-height: 100dvh;
@@ -222,12 +225,12 @@ body::before {
 .counter-label { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--rose-deep); margin-bottom: 10px; font-weight: 500; }
 .counter-nums { display: flex; justify-content: center; gap: 8px; }
 .cnum {
-  min-width: 64px; padding: 8px 4px;
+  flex: 1; min-width: 0; max-width: 88px; padding: 8px 4px;
   background: #fff; border-radius: 10px;
   border: 1px solid var(--blush);
   box-shadow: 0 3px 10px rgba(164,19,60,.08);
 }
-.cnum span { display: block; font-size: 24px; font-weight: 600; color: var(--wine); font-variant-numeric: tabular-nums; }
+.cnum span { display: block; font-size: 22px; font-weight: 600; color: var(--wine); font-variant-numeric: tabular-nums; }
 .cnum small { font-size: 11px; color: var(--ink-soft); }
 
 .paper-sign { margin: 16px 0 20px; font-size: 15px; color: var(--ink); line-height: 1.6; }
@@ -284,6 +287,8 @@ body::before {
   font-size: 15px; line-height: 1.7; color: var(--ink); font-weight: 300; font-style: italic;
 }
 #stage-action { display: flex; justify-content: center; margin-top: 16px; }
+#stage-body { text-align: center; }
+#stage-body .tap-heart { margin: 0 auto; }
 
 .stage-q { font-size: 17px; font-weight: 500; color: var(--wine); }
 .quiz-opts { display: flex; flex-direction: column; gap: 10px; width: 100%; }
@@ -338,7 +343,7 @@ body::before {
   color: var(--rose-deep); font-weight: 500;
 }
 .photo-frame {
-  width: min(300px, 78vw); aspect-ratio: 1;
+  width: min(280px, 72vw); aspect-ratio: 1;
   clip-path: url(#heartClip);
   animation: frameGlow 2.6s ease-in-out infinite;
   background: var(--blush);
@@ -426,30 +431,30 @@ body.rb5::after { background:
   to { transform: translateY(-8px) rotate(4deg); }
 }
 
-/* finale: cặp đôi phía trên khung ảnh */
-.finale-row {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-  width: 100%;
+/* ============ 2 nhân vật lấp ló rình xem ============ */
+#peekers { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.peeker {
+  position: absolute; width: 64px; height: 64px;
+  border-radius: 50%; object-fit: cover;
+  border: 2.5px solid #fff;
+  box-shadow: 0 6px 16px rgba(164,19,60,.28);
+  opacity: 0; user-select: none; -webkit-user-drag: none;
+  animation: peekIn .6s cubic-bezier(.4,0,.3,1.3) forwards, peekBob 3.2s ease-in-out .6s infinite;
 }
-.finale-row .photo-frame { width: min(230px, 56vw); flex: none; }
-.finale-sprite {
-  width: 132px; height: 132px; object-fit: cover; border-radius: 50%;
-  border: 3px solid #fff; flex: none; cursor: pointer;
-  box-shadow: 0 10px 26px rgba(164,19,60,.25), 0 0 24px rgba(255,143,171,.55);
-  animation: spriteIdle 2.6s ease-in-out infinite;
-  transition: transform .45s cubic-bezier(.4,0,.3,1.2);
+@keyframes peekIn {
+  from { opacity: 0; transform: scale(.3) rotate(-10deg); }
+  to { opacity: 1; transform: scale(1) rotate(4deg); }
 }
-@keyframes spriteIdle {
-  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
-  50% { transform: translateY(-7px) rotate(2deg) scale(1.02); }
+@keyframes peekBob {
+  0%, 100% { transform: scale(1) rotate(4deg) translateY(0); }
+  50% { transform: scale(1) rotate(-4deg) translateY(-6px); }
 }
-.finale-row.kiss .finale-sprite { animation: none; transform: scale(1.18) rotate(-4deg); }
 
 @media (max-width: 360px) {
   .envelope { width: 270px; height: 180px; }
   .finale-names { font-size: 38px; }
-  .cnum { min-width: 56px; }
-  .finale-sprite { width: 112px; height: 112px; }
-  .finale-row .photo-frame { width: min(200px, 54vw); }
+  .cnum span { font-size: 18px; }
+  .counter-nums { gap: 6px; }
   .couple-walkin .sprite-couple { width: 128px; height: 128px; }
+  .peeker { width: 56px; height: 56px; }
 }
