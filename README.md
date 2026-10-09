@@ -35,7 +35,12 @@ file theo `unicode-range` nên mọi dấu tiếng Việt đều đúng font, kh
 `assets/cap-doi-chibi.webp` — ảnh AI vẽ cặp đôi chibi: chú rể áo dài navy khăn đóng
 + cô dâu áo dài trắng voan đỏ nắm tay nhau, nền hồng pastel. Hiển thị trong khung
 tròn viền trắng (sticker). Xuất hiện ở: lá thư (trượt lên + tim), mỗi chặng năm
-(nhún đi bộ), finale (phía trên khung ảnh — chạm vào để phóng to + tim bung).
+(nhún đi bộ).
+
+`assets/chu-re-lap-lo.webp` / `assets/co-dau-lap-lo.webp` — 2 nhân vật vẽ riêng
+tư thế lấp ló tò mò. JS tự đặt 1–2 sticker ở vị trí random mỗi màn (góc/cạnh,
+không che nội dung) — kiểu 2 đứa rình xem vợ chơi thử thách. Finale chỉ giữ
+khung tim ảnh thật, không chibi.
 
 ## Flow (v2)
 
