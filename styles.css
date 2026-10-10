@@ -353,7 +353,8 @@ body::before {
 }
 .photo-frame {
   width: min(280px, 72vw); aspect-ratio: 1;
-  clip-path: url(#heartClip);
+  border-radius: 24px;
+  overflow: hidden;
   animation: frameGlow 2.6s ease-in-out infinite;
   background: var(--blush);
 }
@@ -363,7 +364,7 @@ body::before {
   50% { filter: drop-shadow(0 0 26px rgba(255,143,171,1)) drop-shadow(0 0 70px rgba(212,162,78,.7)); }
 }
 .finale-names { font-size: 46px; color: var(--wine); line-height: 1.25; }
-.finale-names .heart-inline { width: 1.4em; height: 1.4em; vertical-align: -.28em; border-radius: 50%; object-fit: cover; filter: drop-shadow(0 2px 6px rgba(242,92,132,.5)); }
+.finale-names .heart-inline { width: .72em; height: .72em; vertical-align: -.06em; filter: drop-shadow(0 2px 6px rgba(242,92,132,.5)); }
 .finale-dates { font-size: 15px; letter-spacing: .14em; color: var(--gold); font-weight: 600; }
 .finale-letter {
   background: rgba(255, 253, 251, .85);
