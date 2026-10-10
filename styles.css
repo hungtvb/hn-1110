@@ -178,7 +178,7 @@ body::before {
   box-shadow: 0 3px 10px rgba(120, 70, 10, .4), inset 0 0 0 3px rgba(255,255,255,.35);
   transition: opacity .5s ease, transform .5s ease;
 }
-.env-seal img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+.env-seal svg { width: 26px; height: 26px; }
 .envelope.open .env-seal { opacity: 0; transform: translate(-50%, -50%) scale(.4); }
 
 .letter-mini {
@@ -363,7 +363,7 @@ body::before {
   50% { filter: drop-shadow(0 0 26px rgba(255,143,171,1)) drop-shadow(0 0 70px rgba(212,162,78,.7)); }
 }
 .finale-names { font-size: 46px; color: var(--wine); line-height: 1.25; }
-.finale-names .heart-inline { width: .72em; height: .72em; vertical-align: -.06em; filter: drop-shadow(0 2px 6px rgba(242,92,132,.5)); }
+.finale-names .heart-inline { width: 1.4em; height: 1.4em; vertical-align: -.28em; border-radius: 50%; object-fit: cover; filter: drop-shadow(0 2px 6px rgba(242,92,132,.5)); }
 .finale-dates { font-size: 15px; letter-spacing: .14em; color: var(--gold); font-weight: 600; }
 .finale-letter {
   background: rgba(255, 253, 251, .85);
