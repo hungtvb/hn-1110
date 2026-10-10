@@ -205,81 +205,29 @@ function fxLoop() {
 function setFxMode(m) { fxMode = m; }
 fxLoop();
 
-/* ================= Nhạc music-box (WebAudio, tự sinh) ================= */
+/* ================= Nhạc nền (MP3) ================= */
 var MusicBox = (function () {
-  var ctx = null, master = null, playing = false;
-  var schedTimer = null, nextTime = 0, noteIdx = 0;
-
-  // giai điệu valse tự sáng tác (3/4), midi notes; [midi, beats]
-  var MELODY = [
-    [84,1],[88,1],[91,1],          // C6 E6 G6
-    [93,1.5],[91,0.5],[88,1],      // A6 G6 E6
-    [89,1],[88,1],[86,1],          // F6 E6 D6
-    [84,2.5],[0,0.5],              // C6 (nghỉ)
-    [86,1],[88,1],[89,1],          // D6 E6 F6
-    [91,1.5],[88,0.5],[86,1],      // G6 E6 D6
-    [88,1],[86,1],[84,1],          // E6 D6 C6
-    [84,3]                          // C6 giữ
-  ];
-  var BASS = [48, 53, 55, 48, 50, 55, 48, 48]; // C F G C D G C C theo từng ô nhịp
-  var BEAT = 0.55; // giây / beat
-
-  function midiHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+  var audio = null, playing = false;
 
   function ensure() {
-    if (!ctx) {
-      var AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return false;
-      ctx = new AC();
-      master = ctx.createGain();
-      master.gain.value = 0.5;
-      master.connect(ctx.destination);
+    if (!audio) {
+      audio = new Audio('assets/nhac-nen.mp3');
+      audio.loop = true;
+      audio.volume = 0.7;
     }
-    if (ctx.state === 'suspended') ctx.resume();
     return true;
   }
-
-  // tiếng music-box: sine + hài âm cao, decay dài
-  function pluck(freq, t, vol) {
-    var o1 = ctx.createOscillator(); o1.type = 'sine'; o1.frequency.value = freq;
-    var o2 = ctx.createOscillator(); o2.type = 'sine'; o2.frequency.value = freq * 4;
-    var g2 = ctx.createGain(); g2.gain.value = 0.10;
-    var g = ctx.createGain();
-    o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(master);
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(vol, t + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 2.4);
-    o1.start(t); o2.start(t);
-    o1.stop(t + 2.6); o2.stop(t + 2.6);
-  }
-
-  function schedule() {
-    while (nextTime < ctx.currentTime + 0.8) {
-      var n = MELODY[noteIdx];
-      if (n[0] !== 0) pluck(midiHz(n[0]), nextTime, 0.32);
-      // bass nhẹ vào đầu mỗi ô nhịp (3 beats)
-      if (barBeat === 0) pluck(midiHz(BASS[barIdx % BASS.length]), nextTime, 0.14);
-      var beats = n[1];
-      nextTime += beats * BEAT;
-      barBeat = (barBeat + beats) % 3;
-      if (barBeat === 0) barIdx++;
-      noteIdx = (noteIdx + 1) % MELODY.length;
-    }
-  }
-  var barBeat = 0, barIdx = 0;
 
   return {
     start: function () {
       if (!ensure() || playing) return;
       playing = true;
-      noteIdx = 0; barBeat = 0; barIdx = 0;
-      nextTime = ctx.currentTime + 0.15;
-      schedTimer = setInterval(schedule, 200);
+      audio.play().catch(function () { playing = false; });
       $('music-toggle').classList.remove('muted');
     },
     stop: function () {
       playing = false;
-      if (schedTimer) { clearInterval(schedTimer); schedTimer = null; }
+      if (audio) audio.pause();
       $('music-toggle').classList.add('muted');
     },
     toggle: function () {
